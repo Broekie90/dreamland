@@ -1,61 +1,81 @@
 [
   {
     "Old_item_id": 236,
+    "Old_item_status": "INACTIVE",
     "New_item_id": 324874,
+    "New_item_status": "ACTIVE",
     "Costing_run": "CDRN_COS_1",
     "Status": "Done"
   },
   {
     "Old_item_id": 1296,
+    "Old_item_status": "INACTIVE",
     "New_item_id": 325972,
+    "New_item_status": "ACTIVE",
     "Costing_run": "CDRN_COS_02",
     "Status": "Done"
   },
   {
     "Old_item_id": 41358,
+    "Old_item_status": "INACTIVE",
     "New_item_id": 325973,
+    "New_item_status": "ACTIVE",
     "Costing_run": "CDRN_COS_02",
     "Status": "Done"
   },
   {
     "Old_item_id": 72021,
+    "Old_item_status": "INACTIVE",
     "New_item_id": 325974,
+    "New_item_status": "ACTIVE",
     "Costing_run": "CDRN_COS_02",
     "Status": "Done"
   },
   {
     "Old_item_id": 94531,
+    "Old_item_status": "INACTIVE",
     "New_item_id": 326272,
+    "New_item_status": "ACTIVE",
     "Costing_run": "CDRN_COS_02",
     "Status": "Done"
   },
   {
     "Old_item_id": 94536,
+    "Old_item_status": "INACTIVE",
     "New_item_id": 326273,
+    "New_item_status": "ACTIVE",
     "Costing_run": "CDRN_COS_02",
     "Status": "Done"
   },
   {
     "Old_item_id": 94565,
+    "Old_item_status": "INACTIVE",
     "New_item_id": 326274,
+    "New_item_status": "ACTIVE",
     "Costing_run": "CDRN_COS_02",
     "Status": "Done"
   },
   {
     "Old_item_id": 94588,
+    "Old_item_status": "INACTIVE",
     "New_item_id": 326275,
+    "New_item_status": "ACTIVE",
     "Costing_run": "CDRN_COS_02",
     "Status": "Done"
   },
   {
     "Old_item_id": 94776,
+    "Old_item_status": "INACTIVE",
     "New_item_id": 325975,
+    "New_item_status": "ACTIVE",
     "Costing_run": "CDRN_COS_02",
     "Status": "Done"
   },
   {
     "Old_item_id": 95488,
+    "Old_item_status": "INACTIVE",
     "New_item_id": 326076,
+    "New_item_status": "ACTIVE",
     "Costing_run": "CDRN_COS_02",
     "Status": "Done"
   }
