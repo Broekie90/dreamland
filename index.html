@@ -653,6 +653,7 @@
             setUnlocked(!!(remember && remember.checked));
             pw.value = "";
             lockUI(false);
+            load();
             // start app load (optional if you gate it)
             return;
           }
