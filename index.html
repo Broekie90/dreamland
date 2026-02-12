@@ -405,10 +405,102 @@
       table{ table-layout:auto; }
       tbody td{ white-space: normal; }
     }
+
+        /* Lock overlay */
+        .lock{
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      display: grid;
+      place-items: center;
+      padding: 18px;
+      background:
+        radial-gradient(1200px 700px at 18% -10%, rgba(124,92,255,.35), transparent 60%),
+        radial-gradient(900px 600px at 90% 10%, rgba(46,233,166,.18), transparent 62%),
+        linear-gradient(180deg, var(--bg0), var(--bg1));
+    }
+    .lock.hidden{ display:none; }
+
+    .lock-card{
+      width: min(520px, 100%);
+      border-radius: var(--radius);
+      border: 1px solid var(--stroke);
+      background: linear-gradient(180deg, var(--panel2), var(--panel));
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(16px);
+      padding: 18px;
+    }
+    .lock-title{
+      font-weight: 900;
+      letter-spacing: .2px;
+      font-size: 16px;
+      margin-bottom: 6px;
+    }
+    .lock-sub{
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 14px;
+    }
+    .lock-form{
+      display: grid;
+      gap: 10px;
+    }
+    .lock-form input[type="password"]{
+      width: 100%;
+      padding: 12px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--stroke);
+      background: rgba(255,255,255,.04);
+      color: var(--text);
+      outline: none;
+      font-family: var(--font);
+      font-size: 13px;
+    }
+    .lock-remember{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      color: var(--muted);
+      font-size: 12px;
+      user-select:none;
+    }
+    .lock-err{
+      min-height: 18px;
+      color: var(--danger);
+      font-size: 12px;
+      font-family: var(--mono);
+    }
+    .lock-foot{
+      margin-top: 10px;
+      color: var(--muted2);
+      font-size: 11.5px;
+      font-family: var(--mono);
+    }
+
   </style>
 </head>
 
 <body>
+  <!-- Simple client-side lock (NOT secure) -->
+  <div id="lock" class="lock">
+    <div class="lock-card">
+      <div class="lock-title">🔒 Dreamland</div>
+      <div class="lock-sub">Voer wachtwoord in om verder te gaan.</div>
+
+      <form id="lockForm" class="lock-form" autocomplete="off">
+        <input id="lockPw" type="password" placeholder="Wachtwoord…" autofocus />
+        <label class="lock-remember">
+          <input id="lockRemember" type="checkbox" />
+          Onthoud in deze browser
+        </label>
+        <button class="btn primary" type="submit">Unlock</button>
+        <div id="lockErr" class="lock-err" aria-live="polite"></div>
+      </form>
+
+      <div class="lock-foot">Tip: dit is alleen een client-side gate.</div>
+    </div>
+  </div>
+
   <div class="wrap">
     <div class="topbar">
       <div class="brand">
@@ -497,6 +589,83 @@
   </div>
 
   <script>
+        // ---- Client-side lock (NOT secure) ----
+    // SHA-256("Dreamland12345!") = set below (generate once, see helper at bottom)
+    const PW_HASH_HEX = "REPLACE_WITH_HASH"; // <-- vul in
+
+    const LOCK_KEY = "dreamland_unlocked_v1";
+
+    function hexFromBuf(buf){
+      return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2,"0")).join("");
+    }
+
+    async function sha256Hex(str){
+      const enc = new TextEncoder().encode(str);
+      const hash = await crypto.subtle.digest("SHA-256", enc);
+      return hexFromBuf(hash);
+    }
+
+    function isUnlocked(){
+      return localStorage.getItem(LOCK_KEY) === "1" || sessionStorage.getItem(LOCK_KEY) === "1";
+    }
+
+    function setUnlocked(remember){
+      if (remember) localStorage.setItem(LOCK_KEY, "1");
+      else sessionStorage.setItem(LOCK_KEY, "1");
+    }
+
+    function lockUI(show){
+      const lock = $("lock");
+      if (!lock) return;
+      lock.classList.toggle("hidden", !show);
+      document.body.style.overflow = show ? "hidden" : "";
+    }
+
+    async function initLock(){
+      // already unlocked?
+      if (isUnlocked()){
+        lockUI(false);
+        return;
+      }
+
+      lockUI(true);
+
+      const form = $("lockForm");
+      const pw = $("lockPw");
+      const err = $("lockErr");
+      const remember = $("lockRemember");
+
+      if (!form || !pw) return;
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        if (err) err.textContent = "";
+
+        const val = (pw.value || "").trim();
+        if (!val){
+          if (err) err.textContent = "Voer een wachtwoord in.";
+          return;
+        }
+
+        try{
+          const h = await sha256Hex(val);
+          if (h === PW_HASH_HEX){
+            setUnlocked(!!(remember && remember.checked));
+            pw.value = "";
+            lockUI(false);
+            // start app load (optional if you gate it)
+            return;
+          }
+          if (err) err.textContent = "Onjuist wachtwoord.";
+          pw.select();
+        } catch (ex){
+          console.error(ex);
+          if (err) err.textContent = "Kan hash niet berekenen in deze browser.";
+        }
+      });
+    }
+    // ---------------------------------------
+
     const DATA_URL = "./data.json";
     const COSTING_RUN_COL = "Costing_run";
 
@@ -933,11 +1102,17 @@
       }
     }
 
-    function init(){
+    async function init(){
       initTheme();
       initControls();
-      load();
+      await initLock();
+
+      // Gate loading data until unlocked
+      if (isUnlocked()){
+        load();
+      }
     }
+
 
     document.addEventListener("DOMContentLoaded", init);
 
