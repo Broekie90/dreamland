@@ -614,23 +614,29 @@
       }
       sel.value = selectedRun;
     }
-
     function renderRunBadges(){
-      const badgeRun = $("badgeRun");
-      const badgeRunCount = $("badgeRunCount");
-      const badgeRows = $("badgeRows");
-      if (!badgeRun || !badgeRunCount || !badgeRows) return;
+  const badgeRun = $("badgeRun");
+  const badgeRunCount = $("badgeRunCount");
+  const badgeRows = $("badgeRows");
 
-      const runLabel = (selectedRun === "__ALL__") ? "All" : selectedRun;
-      badgeRun.innerHTML = `Costing_run: <strong>${escapeHtml(runLabel)}</strong>`;
+  const runLabel = (selectedRun === "__ALL__") ? "All" : selectedRun;
 
-      let inRun = raw.length;
-      if (selectedRun !== "__ALL__"){
-        inRun = runCounts.get(selectedRun) || 0;
-      }
-      badgeRunCount.innerHTML = `Run count: <strong>${inRun.toLocaleString()}</strong>`;
-      badgeRows.innerHTML = `Rows: <strong>${filtered.length.toLocaleString()}</strong>`;
-    }
+  if (badgeRun) {
+    badgeRun.innerHTML = `Costing_run: <strong>${escapeHtml(runLabel)}</strong>`;
+  }
+
+  let inRun = raw.length;
+  if (selectedRun !== "__ALL__"){
+    inRun = runCounts.get(selectedRun) || 0;
+  }
+
+  if (badgeRunCount) {
+    badgeRunCount.innerHTML = `Run count: <strong>${inRun.toLocaleString()}</strong>`;
+  }
+  if (badgeRows) {
+    badgeRows.innerHTML = `Rows: <strong>${filtered.length.toLocaleString()}</strong>`;
+  }
+}
 
     function computeMeta(){
       const subtitle = $("subtitle");
@@ -933,7 +939,8 @@
       load();
     }
 
-    init();
+    document.addEventListener("DOMContentLoaded", init);
+
   </script>
 </body>
 </html>
