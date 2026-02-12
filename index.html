@@ -4,33 +4,34 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="color-scheme" content="dark light" />
-  <title>Data Dashboard</title>
+  <title>Dreamland — Data Grid</title>
 
   <!-- Inter font -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-  <!-- Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-
   <style>
     :root{
       --bg0:#070A10;
       --bg1:#0B1020;
-      --card: rgba(255,255,255,.06);
-      --card2: rgba(255,255,255,.085);
-      --stroke: rgba(255,255,255,.10);
+      --panel: rgba(255,255,255,.06);
+      --panel2: rgba(255,255,255,.085);
+      --stroke: rgba(255,255,255,.11);
+
       --text:#EAF0FF;
       --muted:#AAB6D6;
-      --good:#56F2C3;
-      --warn:#FFCC66;
-      --bad:#FF6B8A;
+      --muted2:#8793B4;
+
       --accent:#7C5CFF;
       --accent2:#2EE9A6;
-      --shadow: 0 16px 60px rgba(0,0,0,.55);
+      --danger:#FF6B8A;
+      --warn:#FFCC66;
+
+      --shadow: 0 18px 70px rgba(0,0,0,.55);
       --radius: 18px;
       --radius2: 14px;
+
       --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
       --font: "Inter", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
     }
@@ -38,42 +39,50 @@
     [data-theme="light"]{
       --bg0:#F7F9FF;
       --bg1:#EEF2FF;
-      --card: rgba(20,25,45,.06);
-      --card2: rgba(20,25,45,.08);
-      --stroke: rgba(20,25,45,.10);
-      --text:#11162A;
+      --panel: rgba(20,25,45,.06);
+      --panel2: rgba(20,25,45,.085);
+      --stroke: rgba(20,25,45,.12);
+
+      --text:#0E1430;
       --muted:#4C5674;
-      --shadow: 0 16px 60px rgba(10,15,30,.18);
+      --muted2:#66709A;
+
+      --shadow: 0 18px 70px rgba(10,15,30,.18);
     }
 
-    *{box-sizing:border-box}
+    *{ box-sizing:border-box }
+    html, body{ height:100% }
+
     body{
       margin:0;
-      font-family:var(--font);
-      color:var(--text);
+      font-family: var(--font);
+      color: var(--text);
       background:
         radial-gradient(1200px 700px at 18% -10%, rgba(124,92,255,.38), transparent 60%),
         radial-gradient(900px 600px at 90% 10%, rgba(46,233,166,.22), transparent 62%),
-        radial-gradient(800px 500px at 40% 110%, rgba(255,107,138,.14), transparent 60%),
+        radial-gradient(900px 600px at 30% 120%, rgba(255,107,138,.12), transparent 60%),
         linear-gradient(180deg, var(--bg0), var(--bg1));
-      min-height:100vh;
       overflow-x:hidden;
     }
 
     .wrap{
-      max-width: 1240px;
+      max-width: 1400px;
       margin: 0 auto;
-      padding: 22px 18px 44px;
+      padding: 18px 16px 40px;
     }
 
+    /* Topbar */
     .topbar{
+      position: sticky;
+      top: 0;
+      z-index: 50;
       display:flex;
       align-items:center;
       justify-content:space-between;
       gap:14px;
       padding: 12px 14px;
       border:1px solid var(--stroke);
-      background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.03));
+      background: linear-gradient(180deg, rgba(255,255,255,.09), rgba(255,255,255,.04));
       border-radius: var(--radius);
       box-shadow: var(--shadow);
       backdrop-filter: blur(14px);
@@ -83,17 +92,19 @@
       display:flex;
       align-items:center;
       gap:12px;
-      min-width: 260px;
+      min-width: 250px;
     }
+
     .logo{
       width:38px;height:38px;border-radius:12px;
       background:
         radial-gradient(12px 12px at 30% 30%, rgba(255,255,255,.85), rgba(255,255,255,0)),
-        radial-gradient(24px 24px at 70% 70%, rgba(46,233,166,.75), rgba(46,233,166,0)),
+        radial-gradient(24px 24px at 70% 70%, rgba(46,233,166,.70), rgba(46,233,166,0)),
         linear-gradient(135deg, rgba(124,92,255,.95), rgba(46,233,166,.55));
-      box-shadow: 0 10px 30px rgba(124,92,255,.22);
       border: 1px solid rgba(255,255,255,.12);
+      box-shadow: 0 10px 30px rgba(124,92,255,.22);
     }
+
     .brand h1{
       font-size: 14px;
       letter-spacing:.2px;
@@ -103,7 +114,8 @@
     .brand .sub{
       font-size: 12px;
       color: var(--muted);
-      margin-top:2px;
+      margin-top: 3px;
+      font-family: var(--mono);
     }
 
     .actions{
@@ -123,9 +135,7 @@
       border: 1px solid var(--stroke);
       background: rgba(255,255,255,.05);
       backdrop-filter: blur(10px);
-      box-shadow: 0 10px 30px rgba(0,0,0,.12);
     }
-
     .pill input, .pill select{
       appearance:none;
       border:0;
@@ -134,8 +144,8 @@
       color: var(--text);
       font-family: var(--font);
       font-size: 13px;
-      min-width: 220px;
     }
+    .pill input{ min-width: 260px; }
     .pill select{ min-width: 160px; cursor:pointer; }
     .pill input::placeholder{ color: color-mix(in srgb, var(--muted) 70%, transparent); }
 
@@ -146,7 +156,7 @@
       background: rgba(255,255,255,.05);
       padding: 10px 12px;
       border-radius: 999px;
-      font-weight: 600;
+      font-weight: 700;
       font-size: 13px;
       display:inline-flex;
       align-items:center;
@@ -157,212 +167,229 @@
     .btn:hover{ background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.16); }
     .btn:active{ transform: translateY(1px); }
     .btn.primary{
-      border-color: rgba(124,92,255,.35);
-      background: linear-gradient(135deg, rgba(124,92,255,.30), rgba(46,233,166,.18));
-    }
-    .btn.primary:hover{
-      border-color: rgba(124,92,255,.55);
-      background: linear-gradient(135deg, rgba(124,92,255,.36), rgba(46,233,166,.22));
+      border-color: rgba(124,92,255,.40);
+      background: linear-gradient(135deg, rgba(124,92,255,.30), rgba(46,233,166,.16));
     }
 
-    .grid{
-      display:grid;
-      grid-template-columns: 1.1fr .9fr;
-      gap: 16px;
-      margin-top: 16px;
-    }
-    @media (max-width: 980px){
-      .grid{ grid-template-columns: 1fr; }
-      .brand{ min-width: auto; }
-      .pill input{ min-width: 160px; }
-    }
-
-    .card{
+    /* Main panel */
+    .panel{
+      margin-top: 14px;
       border: 1px solid var(--stroke);
-      background: linear-gradient(180deg, var(--card2), var(--card));
+      background: linear-gradient(180deg, var(--panel2), var(--panel));
       border-radius: var(--radius);
       box-shadow: var(--shadow);
-      backdrop-filter: blur(14px);
       overflow:hidden;
+      backdrop-filter: blur(14px);
     }
 
-    .card .hd{
+    .panel-hd{
       display:flex;
       align-items:flex-start;
       justify-content:space-between;
-      gap: 14px;
-      padding: 16px 16px 10px;
-      border-bottom: 1px solid rgba(255,255,255,.06);
+      gap: 12px;
+      padding: 14px 16px;
+      border-bottom: 1px solid rgba(255,255,255,.07);
     }
-    .card .hd h2{
+    .panel-hd .title{
       margin:0;
       font-size: 14px;
       letter-spacing:.2px;
     }
-    .card .hd .meta{
+    .panel-hd .meta{
+      margin-top: 5px;
       color: var(--muted);
       font-size: 12px;
-      margin-top: 4px;
     }
 
-    .kpis{
-      display:grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 12px;
-      padding: 14px 16px 16px;
-    }
-    @media (max-width: 700px){
-      .kpis{ grid-template-columns: 1fr; }
-    }
-    .kpi{
-      border: 1px solid rgba(255,255,255,.08);
-      background: rgba(255,255,255,.04);
-      border-radius: var(--radius2);
-      padding: 14px;
-      position:relative;
-      overflow:hidden;
-    }
-    .kpi:before{
-      content:"";
-      position:absolute; inset:-60px -60px auto auto;
-      width:140px;height:140px;
-      background: radial-gradient(circle at 30% 30%, rgba(124,92,255,.35), transparent 60%);
-      filter: blur(0px);
-      transform: rotate(10deg);
-      pointer-events:none;
-    }
-    .kpi .label{
-      color: var(--muted);
-      font-size: 12px;
-      letter-spacing:.2px;
-    }
-    .kpi .value{
-      font-size: 22px;
-      font-weight: 700;
-      margin-top: 6px;
-    }
-    .kpi .hint{
-      color: var(--muted);
-      font-size: 12px;
-      margin-top: 6px;
-      font-family: var(--mono);
-    }
-
-    .body{
-      padding: 14px 16px 16px;
-    }
-
-    .row{
+    .chips{
       display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      margin-bottom: 10px;
+      gap:8px;
       flex-wrap: wrap;
+      justify-content:flex-end;
+      align-items:center;
     }
-
-    .tag{
+    .chip{
       font-family: var(--mono);
       font-size: 12px;
       color: var(--muted);
-      padding: 6px 10px;
-      border: 1px solid rgba(255,255,255,.10);
+      padding: 7px 10px;
+      border: 1px solid rgba(255,255,255,.11);
       border-radius: 999px;
       background: rgba(255,255,255,.04);
+      cursor:pointer;
+      user-select:none;
+      transition: background .15s ease, border-color .15s ease, transform .08s ease;
+    }
+    .chip:hover{ background: rgba(255,255,255,.06); border-color: rgba(255,255,255,.16); }
+    .chip:active{ transform: translateY(1px); }
+    .chip.on{
+      color: color-mix(in srgb, var(--text) 92%, var(--muted));
+      border-color: rgba(124,92,255,.45);
+      background: rgba(124,92,255,.14);
     }
 
+    /* Table */
     .tablewrap{
-      border: 1px solid rgba(255,255,255,.08);
-      border-radius: var(--radius2);
-      overflow:hidden;
-      background: rgba(255,255,255,.03);
+      position: relative;
+      overflow:auto;
+      max-height: calc(100vh - 240px);
+      background: rgba(255,255,255,.02);
     }
 
     table{
-      width:100%;
+      width: 100%;
       border-collapse: collapse;
       font-size: 13px;
+      table-layout: fixed;
     }
+
     thead th{
-      text-align:left;
-      padding: 12px 12px;
-      border-bottom: 1px solid rgba(255,255,255,.08);
-      color: color-mix(in srgb, var(--text) 85%, var(--muted));
-      font-weight: 700;
-      letter-spacing:.15px;
       position: sticky;
       top: 0;
+      z-index: 2;
+      text-align:left;
+      padding: 12px 12px;
+      border-bottom: 1px solid rgba(255,255,255,.10);
+      color: color-mix(in srgb, var(--text) 88%, var(--muted));
+      font-weight: 800;
+      letter-spacing:.18px;
       background: rgba(0,0,0,.18);
-      backdrop-filter: blur(8px);
-      cursor: pointer;
+      backdrop-filter: blur(10px);
+      cursor:pointer;
       user-select:none;
       white-space: nowrap;
+      overflow:hidden;
+      text-overflow: ellipsis;
     }
-    [data-theme="light"] thead th{ background: rgba(255,255,255,.55); }
+    [data-theme="light"] thead th{ background: rgba(255,255,255,.60); }
 
     tbody td{
       padding: 10px 12px;
       border-bottom: 1px solid rgba(255,255,255,.06);
       color: color-mix(in srgb, var(--text) 92%, var(--muted));
       vertical-align: top;
-      max-width: 460px;
-      word-break: break-word;
-    }
-    tbody tr:hover td{
-      background: rgba(124,92,255,.07);
+      overflow:hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
-    .sort{
-      display:inline-flex; align-items:center; gap:8px;
+    tbody tr{
+      transition: background .12s ease;
+      cursor: pointer;
     }
-    .sort .arrow{
+    tbody tr:hover td{ background: rgba(124,92,255,.07); }
+    tbody tr.selected td{ background: rgba(46,233,166,.08); }
+
+    .sort{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      min-width: 0;
+    }
+    .arrow{
       width: 10px; height: 10px;
       display:inline-block;
-      opacity:.75;
+      opacity:.8;
       transform: translateY(1px);
+      flex: 0 0 auto;
     }
     .arrow.up{ border-left:5px solid transparent; border-right:5px solid transparent; border-bottom:8px solid color-mix(in srgb, var(--muted) 85%, transparent); }
     .arrow.down{ border-left:5px solid transparent; border-right:5px solid transparent; border-top:8px solid color-mix(in srgb, var(--muted) 85%, transparent); }
     .arrow.off{ border-left:5px solid transparent; border-right:5px solid transparent; border-top:8px solid rgba(0,0,0,0); }
 
-    .footerbar{
+    /* Footer */
+    .footer{
       display:flex;
       align-items:center;
       justify-content:space-between;
-      gap:10px;
-      padding: 12px 2px 0;
-      flex-wrap: wrap;
+      gap:12px;
+      padding: 12px 14px;
+      border-top: 1px solid rgba(255,255,255,.07);
       color: var(--muted);
       font-size: 12px;
+      flex-wrap: wrap;
     }
 
     .pager{
       display:flex;
       align-items:center;
       gap:8px;
+      flex-wrap: wrap;
+      justify-content:flex-end;
     }
-    .pager .btn{ padding: 8px 10px; font-weight: 700; }
-    .pager .stat{
+    .stat{
       font-family: var(--mono);
       padding: 8px 10px;
       border-radius: 999px;
       border: 1px solid rgba(255,255,255,.10);
       background: rgba(255,255,255,.04);
+      color: var(--muted);
     }
 
-    .toast{
-      margin-top: 14px;
-      padding: 12px 14px;
+    /* Details drawer */
+    .drawer{
+      position: fixed;
+      right: 14px;
+      bottom: 14px;
+      width: min(520px, calc(100vw - 28px));
       border-radius: var(--radius);
-      border: 1px dashed rgba(255,255,255,.18);
-      background: rgba(255,255,255,.04);
-      color: var(--muted);
-      font-size: 12px;
-      line-height: 1.5;
+      border: 1px solid var(--stroke);
+      background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.05));
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(16px);
+      overflow:hidden;
+      transform: translateY(12px);
+      opacity: 0;
+      pointer-events:none;
+      transition: opacity .15s ease, transform .15s ease;
     }
-    code{ font-family: var(--mono); }
-    a{ color: color-mix(in srgb, var(--accent2) 70%, var(--text)); text-decoration: none; }
-    a:hover{ text-decoration: underline; }
+    .drawer.show{
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events:auto;
+    }
+    .drawer-hd{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding: 12px 14px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+    }
+    .drawer-hd .t{
+      font-weight: 800;
+      font-size: 13px;
+      letter-spacing:.2px;
+    }
+    .drawer-body{
+      padding: 10px 14px 14px;
+      max-height: 50vh;
+      overflow:auto;
+    }
+    .kv{
+      display:grid;
+      grid-template-columns: 160px 1fr;
+      gap: 8px 12px;
+      font-size: 12.5px;
+    }
+    .k{
+      color: var(--muted2);
+      font-family: var(--mono);
+      overflow:hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .v{
+      color: color-mix(in srgb, var(--text) 92%, var(--muted));
+      word-break: break-word;
+      font-family: var(--mono);
+    }
+
+    @media (max-width: 900px){
+      .pill input{ min-width: 180px; }
+      table{ table-layout:auto; }
+      tbody td{ white-space: normal; }
+    }
   </style>
 </head>
 
@@ -372,20 +399,31 @@
       <div class="brand">
         <div class="logo" aria-hidden="true"></div>
         <div>
-          <h1>High-End Data Dashboard</h1>
+          <h1>Dreamland — Data Grid</h1>
           <div class="sub" id="subtitle">Loading…</div>
         </div>
       </div>
 
       <div class="actions">
-        <div class="pill" title="Zoeken (over alle kolommen)">
-          <span style="opacity:.8">🔎</span>
+        <div class="pill" title="Zoeken over alle kolommen">
+          <span style="opacity:.85">🔎</span>
           <input id="q" type="search" placeholder="Search… (e.g. 'Amsterdam', '42', 'active')" />
         </div>
 
-        <div class="pill" title="Filter op kolom (voor chart & focus)">
-          <span style="opacity:.8">⛭</span>
-          <select id="focusCol"></select>
+        <div class="pill" title="Filter: alleen rijen waar kolom waarde bevat (substring match)">
+          <span style="opacity:.85">⛭</span>
+          <select id="col"></select>
+          <input id="colv" type="text" placeholder="value…" style="min-width:160px" />
+        </div>
+
+        <div class="pill" title="Rows per page">
+          <span style="opacity:.85">≡</span>
+          <select id="ps">
+            <option>25</option>
+            <option>50</option>
+            <option>100</option>
+            <option>200</option>
+          </select>
         </div>
 
         <button class="btn primary" id="reload">⟳ Reload</button>
@@ -393,106 +431,65 @@
       </div>
     </div>
 
-    <div class="grid">
-      <!-- Left: Table + KPIs -->
-      <section class="card">
-        <div class="hd">
-          <div>
-            <h2>Dataset</h2>
-            <div class="meta" id="meta">—</div>
-          </div>
-          <div class="tag" id="tag">data.json</div>
+    <section class="panel">
+      <div class="panel-hd">
+        <div>
+          <h2 class="title">Table view</h2>
+          <div class="meta" id="meta">—</div>
         </div>
-
-        <div class="kpis">
-          <div class="kpi">
-            <div class="label">Records</div>
-            <div class="value" id="kpiRows">—</div>
-            <div class="hint" id="kpiRowsHint">—</div>
-          </div>
-          <div class="kpi">
-            <div class="label">Columns</div>
-            <div class="value" id="kpiCols">—</div>
-            <div class="hint" id="kpiColsHint">—</div>
-          </div>
-          <div class="kpi">
-            <div class="label">Last refresh</div>
-            <div class="value" id="kpiTime">—</div>
-            <div class="hint" id="kpiTimeHint">—</div>
-          </div>
+        <div class="chips">
+          <div class="chip" id="chipNull">NULL/empty</div>
+          <div class="chip" id="chipUnique">unique</div>
+          <div class="chip" id="chipCopy">copy row</div>
         </div>
+      </div>
 
-        <div class="body">
-          <div class="row">
-            <div class="tag" id="stateTag">Initializing…</div>
-            <div class="pager">
-              <button class="btn" id="prev">←</button>
-              <div class="stat" id="pageStat">—</div>
-              <button class="btn" id="next">→</button>
-            </div>
-          </div>
+      <div class="tablewrap">
+        <table>
+          <thead id="thead"></thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
 
-          <div class="tablewrap">
-            <table>
-              <thead id="thead"></thead>
-              <tbody id="tbody"></tbody>
-            </table>
-          </div>
-
-          <div class="footerbar">
-            <div id="footLeft">—</div>
-            <div id="footRight">Tip: klik op een kolomheader om te sorteren.</div>
-          </div>
-
-          <div class="toast" id="toast">
-            <strong>Local dev:</strong> gebruik <code>python -m http.server</code> (fetch werkt niet altijd via dubbelklik).
-            <br>
-            <strong>GitHub Pages:</strong> commit <code>index.html</code> + <code>data.json</code> in root → Pages folder <code>/ (root)</code>.
-          </div>
+      <div class="footer">
+        <div id="footLeft">—</div>
+        <div class="pager">
+          <button class="btn" id="prev">←</button>
+          <div class="stat" id="pageStat">—</div>
+          <button class="btn" id="next">→</button>
         </div>
-      </section>
+      </div>
+    </section>
+  </div>
 
-      <!-- Right: Chart -->
-      <aside class="card">
-        <div class="hd">
-          <div>
-            <h2>Distribution</h2>
-            <div class="meta">Top 10 waarden in de geselecteerde kolom</div>
-          </div>
-          <div class="tag" id="chartTag">—</div>
-        </div>
-        <div class="body">
-          <canvas id="chart" height="240"></canvas>
-          <div class="footerbar" style="padding-top:10px">
-            <div id="chartNote">—</div>
-            <div class="tag" id="chartMode">count</div>
-          </div>
-        </div>
-      </aside>
+  <!-- Details drawer -->
+  <div class="drawer" id="drawer">
+    <div class="drawer-hd">
+      <div class="t" id="drawerTitle">Row details</div>
+      <button class="btn" id="close">✕ Close</button>
+    </div>
+    <div class="drawer-body">
+      <div class="kv" id="kv"></div>
     </div>
   </div>
 
   <script>
-    // -----------------------------
-    // Config
-    // -----------------------------
     const DATA_URL = "./data.json";
-    const PAGE_SIZE = 25;
 
-    // -----------------------------
-    // State
-    // -----------------------------
     let raw = [];
     let cols = [];
     let filtered = [];
     let page = 1;
     let sortKey = null;
-    let sortDir = "asc"; // asc | desc
-    let chart = null;
+    let sortDir = "asc";
+    let pageSize = 25;
 
-    // -----------------------------
-    // Helpers
-    // -----------------------------
+    let chipNullOn = false;
+    let chipUniqueOn = false;
+
+    let selectedIndex = -1; // index within current page slice
+    let selectedRow = null;
+
     const $ = (id) => document.getElementById(id);
 
     function nowStamp(){
@@ -500,16 +497,20 @@
       return d.toLocaleString(undefined, { year:"numeric", month:"short", day:"2-digit", hour:"2-digit", minute:"2-digit", second:"2-digit" });
     }
 
-    function setStateTag(text, kind="info"){
-      const el = $("stateTag");
-      el.textContent = text;
-      // kind could be used for color if you want; keep subtle for now
-    }
-
     function safeStr(v){
       if (v === null || v === undefined) return "";
       if (typeof v === "object") return JSON.stringify(v);
       return String(v);
+    }
+
+    function escapeHtml(s){
+      return String(s).replace(/[&<>"']/g, (m) => ({
+        "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+      }[m]));
+    }
+
+    function isEmptyish(v){
+      return v === null || v === undefined || String(v).trim() === "";
     }
 
     function isNumericLike(v){
@@ -521,7 +522,6 @@
     }
 
     function compare(a, b){
-      // smart compare: numbers first if both numeric-like, else localeCompare
       const an = isNumericLike(a);
       const bn = isNumericLike(b);
       if (an && bn){
@@ -532,34 +532,78 @@
       return safeStr(a).localeCompare(safeStr(b), undefined, { numeric: true, sensitivity: "base" });
     }
 
-    function applySearch(){
-      const q = $("q").value.trim().toLowerCase();
-      if (!q){
-        filtered = raw.slice();
-      } else {
-        filtered = raw.filter(row => cols.some(c => safeStr(row[c]).toLowerCase().includes(q)));
-      }
-      page = 1;
-      applySort();
-    }
-
-    function applySort(){
-      if (sortKey){
-        filtered.sort((r1, r2) => {
-          const c = compare(r1[sortKey], r2[sortKey]);
-          return sortDir === "asc" ? c : -c;
-        });
-      }
-      render();
-    }
-
     function pageCount(){
-      return Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+      return Math.max(1, Math.ceil(filtered.length / pageSize));
     }
 
     function pageSlice(){
-      const start = (page - 1) * PAGE_SIZE;
-      return filtered.slice(start, start + PAGE_SIZE);
+      const start = (page - 1) * pageSize;
+      return filtered.slice(start, start + pageSize);
+    }
+
+    function setChips(){
+      $("chipNull").classList.toggle("on", chipNullOn);
+      $("chipUnique").classList.toggle("on", chipUniqueOn);
+    }
+
+    function computeMeta(){
+      $("subtitle").textContent = `Loaded ${raw.length.toLocaleString()} rows • ${nowStamp()}`;
+      $("meta").textContent =
+        `Rows: ${raw.length.toLocaleString()} • Filtered: ${filtered.length.toLocaleString()} • Columns: ${cols.length} • Page size: ${pageSize}`;
+    }
+
+    function applyFilters(){
+      const q = $("q").value.trim().toLowerCase();
+      const col = $("col").value;
+      const colv = $("colv").value.trim().toLowerCase();
+
+      let out = raw;
+
+      // global search
+      if (q){
+        out = out.filter(r => cols.some(c => safeStr(r[c]).toLowerCase().includes(q)));
+      }
+
+      // column filter
+      if (col && colv){
+        out = out.filter(r => safeStr(r[col]).toLowerCase().includes(colv));
+      }
+
+      // null/empty chip: keep rows where ANY cell is empty
+      if (chipNullOn){
+        out = out.filter(r => cols.some(c => isEmptyish(r[c])));
+      }
+
+      // unique chip: keep only rows that are unique on selected column (col)
+      if (chipUniqueOn && col){
+        const freq = new Map();
+        for (const r of out){
+          const k = safeStr(r[col]);
+          freq.set(k, (freq.get(k) || 0) + 1);
+        }
+        out = out.filter(r => (freq.get(safeStr(r[col])) || 0) === 1);
+      }
+
+      filtered = out.slice();
+
+      // sorting
+      if (sortKey){
+        filtered.sort((a,b) => {
+          const c = compare(a[sortKey], b[sortKey]);
+          return sortDir === "asc" ? c : -c;
+        });
+      }
+
+      page = Math.min(page, pageCount());
+      if (page < 1) page = 1;
+
+      selectedIndex = -1;
+      selectedRow = null;
+      hideDrawer();
+
+      computeMeta();
+      renderHeader();
+      renderBody();
     }
 
     function renderHeader(){
@@ -571,8 +615,11 @@
 
       thead.innerHTML = `<tr>${
         cols.map(c => `
-          <th data-col="${c}">
-            <span class="sort">${c} ${arrows(c)}</span>
+          <th title="${escapeHtml(c)}" data-col="${escapeHtml(c)}">
+            <span class="sort">
+              <span style="min-width:0;overflow:hidden;text-overflow:ellipsis">${escapeHtml(c)}</span>
+              ${arrows(c)}
+            </span>
           </th>
         `).join("")
       }</tr>`;
@@ -586,7 +633,7 @@
             sortKey = c;
             sortDir = "asc";
           }
-          applySort();
+          applyFilters();
         });
       });
     }
@@ -595,126 +642,64 @@
       const tbody = $("tbody");
       const rows = pageSlice();
 
-      tbody.innerHTML = rows.map(r => `
-        <tr>
-          ${cols.map(c => `<td>${escapeHtml(safeStr(r[c]))}</td>`).join("")}
+      tbody.innerHTML = rows.map((r, idx) => `
+        <tr data-idx="${idx}">
+          ${cols.map(c => `<td title="${escapeHtml(safeStr(r[c]))}">${escapeHtml(safeStr(r[c]))}</td>`).join("")}
         </tr>
       `).join("");
 
-      $("pageStat").textContent = `Page ${page} / ${pageCount()}`;
-      $("footLeft").textContent = `${filtered.length.toLocaleString()} records • showing ${Math.min(PAGE_SIZE, rows.length)} on this page`;
-    }
-
-    function renderKpis(){
-      $("kpiRows").textContent = raw.length.toLocaleString();
-      $("kpiRowsHint").textContent = filtered.length === raw.length
-        ? "no filter"
-        : `filtered: ${filtered.length.toLocaleString()}`;
-
-      $("kpiCols").textContent = cols.length.toLocaleString();
-      $("kpiColsHint").textContent = cols.slice(0, 4).join(", ") + (cols.length > 4 ? "…" : "");
-
-      $("kpiTime").textContent = new Date().toLocaleTimeString();
-      $("kpiTimeHint").textContent = nowStamp();
-    }
-
-    function renderMeta(){
-      $("meta").textContent = `Rows: ${raw.length.toLocaleString()} • Columns: ${cols.length} • Page size: ${PAGE_SIZE}`;
-      $("subtitle").textContent = `Loaded ${raw.length.toLocaleString()} records • ${nowStamp()}`;
-      $("tag").textContent = DATA_URL.replace("./", "");
-    }
-
-    function renderFocusSelect(){
-      const sel = $("focusCol");
-      sel.innerHTML = cols.map(c => `<option value="${escapeAttr(c)}">${escapeHtml(c)}</option>`).join("");
-      sel.value = cols[0] || "";
-      $("chartTag").textContent = sel.value || "—";
-      sel.addEventListener("change", () => {
-        $("chartTag").textContent = sel.value || "—";
-        renderChart();
+      // row click -> details
+      tbody.querySelectorAll("tr").forEach(tr => {
+        tr.addEventListener("click", () => {
+          tbody.querySelectorAll("tr").forEach(x => x.classList.remove("selected"));
+          tr.classList.add("selected");
+          selectedIndex = Number(tr.getAttribute("data-idx"));
+          selectedRow = rows[selectedIndex];
+          showDrawer(selectedRow);
+        });
       });
+
+      $("pageStat").textContent = `Page ${page} / ${pageCount()}`;
+      $("footLeft").textContent = `${filtered.length.toLocaleString()} records • showing ${Math.min(pageSize, rows.length)} on this page`;
     }
 
-    function renderChart(){
-      const col = $("focusCol").value;
-      if (!col){
-        $("chartNote").textContent = "No column selected.";
+    function showDrawer(row){
+      $("drawer").classList.add("show");
+      $("drawerTitle").textContent = "Row details";
+      const kv = $("kv");
+      kv.innerHTML = cols.map(c => `
+        <div class="k">${escapeHtml(c)}</div>
+        <div class="v">${escapeHtml(safeStr(row[c]))}</div>
+      `).join("");
+    }
+
+    function hideDrawer(){
+      $("drawer").classList.remove("show");
+      $("kv").innerHTML = "";
+    }
+
+    async function copySelectedRow(){
+      if (!selectedRow){
+        alert("Selecteer eerst een rij (klik op een row).");
         return;
       }
-
-      // frequency count of values (stringified) from filtered dataset (so chart matches search)
-      const freq = new Map();
-      for (const r of filtered){
-        const v = safeStr(r[col]);
-        const key = v === "" ? "(empty)" : v;
-        freq.set(key, (freq.get(key) || 0) + 1);
+      try{
+        await navigator.clipboard.writeText(JSON.stringify(selectedRow, null, 2));
+      } catch (e){
+        // fallback
+        const ta = document.createElement("textarea");
+        ta.value = JSON.stringify(selectedRow, null, 2);
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        ta.remove();
       }
-
-      // top 10
-      const entries = Array.from(freq.entries()).sort((a,b) => b[1]-a[1]).slice(0, 10);
-      const labels = entries.map(e => e[0]);
-      const values = entries.map(e => e[1]);
-
-      $("chartNote").textContent = `Based on ${filtered.length.toLocaleString()} records (after filters).`;
-
-      const ctx = $("chart").getContext("2d");
-      if (chart) chart.destroy();
-
-      chart = new Chart(ctx, {
-        type: "bar",
-        data: {
-          labels,
-          datasets: [{
-            label: `Count by ${col}`,
-            data: values,
-            borderWidth: 1
-          }]
-        },
-        options: {
-          responsive: true,
-          plugins: {
-            legend: { display: false },
-            tooltip: { enabled: true }
-          },
-          scales: {
-            x: {
-              ticks: { color: getComputedStyle(document.body).getPropertyValue("--muted").trim() || undefined }
-            },
-            y: {
-              beginAtZero: true,
-              ticks: { color: getComputedStyle(document.body).getPropertyValue("--muted").trim() || undefined }
-            }
-          }
-        }
-      });
     }
 
-    function render(){
-      renderKpis();
-      renderHeader();
-      renderBody();
-      renderChart();
-      setStateTag(filtered.length === raw.length ? "Ready" : "Filtered");
-    }
-
-    function escapeHtml(s){
-      return s.replace(/[&<>"']/g, (m) => ({
-        "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
-      }[m]));
-    }
-    function escapeAttr(s){
-      return String(s).replace(/"/g, "&quot;");
-    }
-
-    // -----------------------------
-    // Theme
-    // -----------------------------
     function applyTheme(theme){
       document.documentElement.setAttribute("data-theme", theme);
       localStorage.setItem("theme", theme);
       $("theme").textContent = theme === "light" ? "☀️ Light" : "🌙 Dark";
-      // Re-render chart for tick colors
-      if (raw.length) renderChart();
     }
 
     function initTheme(){
@@ -724,76 +709,27 @@
       applyTheme(theme);
     }
 
-    // -----------------------------
-    // Load
-    // -----------------------------
-    async function load(){
-      setStateTag("Loading…");
-      try{
-        const res = await fetch(DATA_URL, { cache: "no-store" });
-        if (!res.ok) throw new Error(`HTTP ${res.status} while fetching ${DATA_URL}`);
-        const data = await res.json();
+    function initControls(){
+      $("q").addEventListener("input", () => applyFilters());
 
-        if (!Array.isArray(data)) throw new Error("data.json must be an array of objects (rows).");
-        raw = data;
+      $("colv").addEventListener("input", () => applyFilters());
 
-        cols = raw.length ? Object.keys(raw[0]) : [];
-        if (!cols.length){
-          setStateTag("Empty dataset");
-          $("tbody").innerHTML = `<tr><td style="padding:16px;color:var(--muted)">No rows found in data.json</td></tr>`;
-          return;
-        }
+      $("col").addEventListener("change", () => applyFilters());
 
-        // normalize: ensure each row has all columns (missing -> null)
-        raw = raw.map(r => {
-          const o = {};
-          for (const c of cols) o[c] = (c in r) ? r[c] : null;
-          return o;
-        });
-
-        filtered = raw.slice();
+      $("ps").addEventListener("change", () => {
+        pageSize = Number($("ps").value);
         page = 1;
-        sortKey = null;
-        sortDir = "asc";
-
-        renderMeta();
-        renderFocusSelect();
-        render();
-      } catch (e){
-        console.error(e);
-        setStateTag("Error");
-        $("subtitle").textContent = "Failed to load data.json";
-        $("meta").textContent = "—";
-        $("tbody").innerHTML = `
-          <tr><td style="padding:16px;color:var(--muted)">
-            <strong>Could not load <code>data.json</code>.</strong><br>
-            ${escapeHtml(String(e.message || e))}<br><br>
-            Local dev: run <code>python -m http.server</code> in your repo root and open <code>http://localhost:8000</code>.
-          </td></tr>
-        `;
-      }
-    }
-
-    // -----------------------------
-    // Wire up UI
-    // -----------------------------
-    function init(){
-      initTheme();
-
-      $("q").addEventListener("input", () => {
-        applySearch();
+        applyFilters();
       });
 
       $("prev").addEventListener("click", () => {
         page = Math.max(1, page - 1);
         renderBody();
-        renderChart();
       });
 
       $("next").addEventListener("click", () => {
         page = Math.min(pageCount(), page + 1);
         renderBody();
-        renderChart();
       });
 
       $("reload").addEventListener("click", () => load());
@@ -803,6 +739,82 @@
         applyTheme(cur === "dark" ? "light" : "dark");
       });
 
+      $("chipNull").addEventListener("click", () => {
+        chipNullOn = !chipNullOn;
+        setChips();
+        applyFilters();
+      });
+
+      $("chipUnique").addEventListener("click", () => {
+        chipUniqueOn = !chipUniqueOn;
+        setChips();
+        applyFilters();
+      });
+
+      $("chipCopy").addEventListener("click", () => copySelectedRow());
+
+      $("close").addEventListener("click", () => hideDrawer());
+
+      // ESC closes drawer
+      window.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") hideDrawer();
+      });
+    }
+
+    async function load(){
+      $("subtitle").textContent = "Loading…";
+      $("meta").textContent = "—";
+
+      try{
+        const res = await fetch(DATA_URL, { cache: "no-store" });
+        if (!res.ok) throw new Error(`HTTP ${res.status} while fetching ${DATA_URL}`);
+        const data = await res.json();
+
+        if (!Array.isArray(data)) throw new Error("data.json must be an array of objects (rows).");
+
+        raw = data;
+        cols = raw.length ? Object.keys(raw[0]) : [];
+
+        // normalize rows to first row's columns
+        raw = raw.map(r => {
+          const o = {};
+          for (const c of cols) o[c] = (c in r) ? r[c] : null;
+          return o;
+        });
+
+        // column dropdown
+        const colSel = $("col");
+        colSel.innerHTML = cols.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join("");
+        if (cols.length) colSel.value = cols[0];
+
+        // reset state
+        page = 1;
+        sortKey = null;
+        sortDir = "asc";
+        chipNullOn = false;
+        chipUniqueOn = false;
+        setChips();
+        hideDrawer();
+
+        computeMeta();
+        renderHeader();
+        applyFilters();
+      } catch (e){
+        console.error(e);
+        $("subtitle").textContent = "Failed to load data.json";
+        $("meta").textContent = String(e.message || e);
+        $("thead").innerHTML = "";
+        $("tbody").innerHTML = `<tr><td style="padding:16px;color:var(--muted)">
+          <strong>Could not load <code>data.json</code>.</strong><br>
+          ${escapeHtml(String(e.message || e))}<br><br>
+          Local: run <code>python -m http.server</code> in repo root and open <code>http://localhost:8000</code>.
+        </td></tr>`;
+      }
+    }
+
+    function init(){
+      initTheme();
+      initControls();
       load();
     }
 
