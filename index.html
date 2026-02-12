@@ -146,7 +146,7 @@
       font-size: 13px;
     }
     .pill input{ min-width: 240px; }
-    .pill select{ min-width: 160px; cursor:pointer; }
+    .pill select{ min-width: 170px; cursor:pointer; }
     .pill input::placeholder{ color: color-mix(in srgb, var(--muted) 70%, transparent); }
 
     .btn{
@@ -425,7 +425,6 @@
           <input id="q" type="search" placeholder="Search… (e.g. '123', 'CDRN', 'Done')" />
         </div>
 
-        <!-- NEW: Costing_run dropdown -->
         <div class="pill" title="Filter op Costing_run (distinct)">
           <span style="opacity:.85">🏷</span>
           <select id="run"></select>
@@ -487,7 +486,6 @@
     </section>
   </div>
 
-  <!-- Details drawer -->
   <div class="drawer" id="drawer">
     <div class="drawer-hd">
       <div class="t" id="drawerTitle">Row details</div>
@@ -516,9 +514,8 @@
     let selectedIndex = -1;
     let selectedRow = null;
 
-    // NEW: run counts and selected run
-    let runCounts = new Map();     // run -> count in RAW
-    let selectedRun = "__ALL__";   // "__ALL__" or actual string
+    let runCounts = new Map();
+    let selectedRun = "__ALL__";
 
     const $ = (id) => document.getElementById(id);
 
@@ -572,15 +569,15 @@
     }
 
     function setChips(){
-      $("chipNull").classList.toggle("on", chipNullOn);
-      $("chipUnique").classList.toggle("on", chipUniqueOn);
+      const a = $("chipNull");
+      const b = $("chipUnique");
+      if (a) a.classList.toggle("on", chipNullOn);
+      if (b) b.classList.toggle("on", chipUniqueOn);
     }
 
-    // NEW: compute distinct costing runs from RAW
     function computeRunCounts(){
       runCounts = new Map();
-      const hasCol = cols.includes(COSTING_RUN_COL);
-      if (!hasCol) return;
+      if (!cols.includes(COSTING_RUN_COL)) return;
 
       for (const r of raw){
         const key = safeStr(r[COSTING_RUN_COL]).trim();
@@ -589,11 +586,11 @@
       }
     }
 
-    // NEW: fill the dropdown
     function renderRunDropdown(){
       const sel = $("run");
-      const hasCol = cols.includes(COSTING_RUN_COL);
+      if (!sel) return;
 
+      const hasCol = cols.includes(COSTING_RUN_COL);
       if (!hasCol){
         sel.innerHTML = `<option value="__ALL__">No Costing_run column</option>`;
         sel.disabled = true;
@@ -601,7 +598,6 @@
         return;
       }
 
-      // sort runs by count desc, then name asc
       const items = Array.from(runCounts.entries())
         .sort((a,b) => (b[1]-a[1]) || a[0].localeCompare(b[0], undefined, {numeric:true, sensitivity:"base"}));
 
@@ -613,47 +609,48 @@
       sel.innerHTML = opts.join("");
       sel.disabled = false;
 
-      // keep selection if still exists
       if (selectedRun !== "__ALL__" && !runCounts.has(selectedRun)){
         selectedRun = "__ALL__";
       }
       sel.value = selectedRun;
     }
 
-    // NEW: update badges for run + counts
     function renderRunBadges(){
       const badgeRun = $("badgeRun");
       const badgeRunCount = $("badgeRunCount");
       const badgeRows = $("badgeRows");
+      if (!badgeRun || !badgeRunCount || !badgeRows) return;
 
       const runLabel = (selectedRun === "__ALL__") ? "All" : selectedRun;
       badgeRun.innerHTML = `Costing_run: <strong>${escapeHtml(runLabel)}</strong>`;
 
-      // count in selected run (from RAW counts)
       let inRun = raw.length;
       if (selectedRun !== "__ALL__"){
         inRun = runCounts.get(selectedRun) || 0;
       }
       badgeRunCount.innerHTML = `Run count: <strong>${inRun.toLocaleString()}</strong>`;
-
-      // current filtered rows (after all filters)
       badgeRows.innerHTML = `Rows: <strong>${filtered.length.toLocaleString()}</strong>`;
     }
 
     function computeMeta(){
-      $("subtitle").textContent = `Loaded ${raw.length.toLocaleString()} rows • ${nowStamp()}`;
-      $("meta").setAttribute("title", "Counts update live with filters");
-      // badges are set in renderRunBadges()
+      const subtitle = $("subtitle");
+      if (subtitle) subtitle.textContent = `Loaded ${raw.length.toLocaleString()} rows • ${nowStamp()}`;
+
+      const meta = $("meta");
+      if (meta) meta.setAttribute("title", "Counts update live with filters");
     }
 
     function applyFilters(){
-      const q = $("q").value.trim().toLowerCase();
-      const col = $("col").value;
-      const colv = $("colv").value.trim().toLowerCase();
+      const qEl = $("q");
+      const colEl = $("col");
+      const colvEl = $("colv");
+
+      const q = qEl ? qEl.value.trim().toLowerCase() : "";
+      const col = colEl ? colEl.value : "";
+      const colv = colvEl ? colvEl.value.trim().toLowerCase() : "";
 
       let out = raw;
 
-      // NEW: costing_run filter first (exact match)
       if (cols.includes(COSTING_RUN_COL) && selectedRun !== "__ALL__"){
         out = out.filter(r => {
           const v = safeStr(r[COSTING_RUN_COL]).trim();
@@ -662,22 +659,18 @@
         });
       }
 
-      // global search
       if (q){
         out = out.filter(r => cols.some(c => safeStr(r[c]).toLowerCase().includes(q)));
       }
 
-      // column filter
       if (col && colv){
         out = out.filter(r => safeStr(r[col]).toLowerCase().includes(colv));
       }
 
-      // null/empty chip: keep rows where ANY cell is empty
       if (chipNullOn){
         out = out.filter(r => cols.some(c => isEmptyish(r[c])));
       }
 
-      // unique chip: keep only rows that are unique on selected column (col)
       if (chipUniqueOn && col){
         const freq = new Map();
         for (const r of out){
@@ -689,7 +682,6 @@
 
       filtered = out.slice();
 
-      // sorting
       if (sortKey){
         filtered.sort((a,b) => {
           const c = compare(a[sortKey], b[sortKey]);
@@ -712,6 +704,8 @@
 
     function renderHeader(){
       const thead = $("thead");
+      if (!thead) return;
+
       const arrows = (k) => {
         if (k !== sortKey) return `<span class="arrow off"></span>`;
         return sortDir === "asc" ? `<span class="arrow up"></span>` : `<span class="arrow down"></span>`;
@@ -744,6 +738,8 @@
 
     function renderBody(){
       const tbody = $("tbody");
+      if (!tbody) return;
+
       const rows = pageSlice();
 
       tbody.innerHTML = rows.map((r, idx) => `
@@ -752,7 +748,6 @@
         </tr>
       `).join("");
 
-      // row click -> details
       tbody.querySelectorAll("tr").forEach(tr => {
         tr.addEventListener("click", () => {
           tbody.querySelectorAll("tr").forEach(x => x.classList.remove("selected"));
@@ -763,14 +758,22 @@
         });
       });
 
-      $("pageStat").textContent = `Page ${page} / ${pageCount()}`;
-      $("footLeft").textContent = `${filtered.length.toLocaleString()} records • showing ${Math.min(pageSize, rows.length)} on this page`;
+      const ps = $("pageStat");
+      if (ps) ps.textContent = `Page ${page} / ${pageCount()}`;
+
+      const fl = $("footLeft");
+      if (fl) fl.textContent = `${filtered.length.toLocaleString()} records • showing ${Math.min(pageSize, rows.length)} on this page`;
     }
 
     function showDrawer(row){
-      $("drawer").classList.add("show");
-      $("drawerTitle").textContent = "Row details";
+      const drawer = $("drawer");
       const kv = $("kv");
+      if (!drawer || !kv) return;
+
+      drawer.classList.add("show");
+      const t = $("drawerTitle");
+      if (t) t.textContent = "Row details";
+
       kv.innerHTML = cols.map(c => `
         <div class="k">${escapeHtml(c)}</div>
         <div class="v">${escapeHtml(safeStr(row[c]))}</div>
@@ -778,8 +781,10 @@
     }
 
     function hideDrawer(){
-      $("drawer").classList.remove("show");
-      $("kv").innerHTML = "";
+      const drawer = $("drawer");
+      const kv = $("kv");
+      if (drawer) drawer.classList.remove("show");
+      if (kv) kv.innerHTML = "";
     }
 
     async function copySelectedRow(){
@@ -802,7 +807,8 @@
     function applyTheme(theme){
       document.documentElement.setAttribute("data-theme", theme);
       localStorage.setItem("theme", theme);
-      $("theme").textContent = theme === "light" ? "☀️ Light" : "🌙 Dark";
+      const themeBtn = $("theme");
+      if (themeBtn) themeBtn.textContent = theme === "light" ? "☀️ Light" : "🌙 Dark";
     }
 
     function initTheme(){
@@ -813,64 +819,60 @@
     }
 
     function initControls(){
-      $("q").addEventListener("input", () => applyFilters());
-      $("colv").addEventListener("input", () => applyFilters());
-      $("col").addEventListener("change", () => applyFilters());
+      const q = $("q");
+      const colv = $("colv");
+      const col = $("col");
+      const run = $("run");
+      const ps = $("ps");
 
-      // NEW: run dropdown changes
-      $("run").addEventListener("change", () => {
-        selectedRun = $("run").value;
+      if (q) q.addEventListener("input", () => applyFilters());
+      if (colv) colv.addEventListener("input", () => applyFilters());
+      if (col) col.addEventListener("change", () => applyFilters());
+
+      if (run) run.addEventListener("change", () => {
+        selectedRun = run.value;
         page = 1;
         applyFilters();
       });
 
-      $("ps").addEventListener("change", () => {
-        pageSize = Number($("ps").value);
+      if (ps) ps.addEventListener("change", () => {
+        pageSize = Number(ps.value);
         page = 1;
         applyFilters();
       });
 
-      $("prev").addEventListener("click", () => {
-        page = Math.max(1, page - 1);
-        renderBody();
-      });
+      const prev = $("prev");
+      const next = $("next");
+      if (prev) prev.addEventListener("click", () => { page = Math.max(1, page - 1); renderBody(); });
+      if (next) next.addEventListener("click", () => { page = Math.min(pageCount(), page + 1); renderBody(); });
 
-      $("next").addEventListener("click", () => {
-        page = Math.min(pageCount(), page + 1);
-        renderBody();
-      });
+      const reload = $("reload");
+      if (reload) reload.addEventListener("click", () => load());
 
-      $("reload").addEventListener("click", () => load());
-
-      $("theme").addEventListener("click", () => {
+      const themeBtn = $("theme");
+      if (themeBtn) themeBtn.addEventListener("click", () => {
         const cur = document.documentElement.getAttribute("data-theme") || "dark";
         applyTheme(cur === "dark" ? "light" : "dark");
       });
 
-      $("chipNull").addEventListener("click", () => {
-        chipNullOn = !chipNullOn;
-        setChips();
-        applyFilters();
-      });
+      const chipNull = $("chipNull");
+      const chipUnique = $("chipUnique");
+      const chipCopy = $("chipCopy");
+      if (chipNull) chipNull.addEventListener("click", () => { chipNullOn = !chipNullOn; setChips(); applyFilters(); });
+      if (chipUnique) chipUnique.addEventListener("click", () => { chipUniqueOn = !chipUniqueOn; setChips(); applyFilters(); });
+      if (chipCopy) chipCopy.addEventListener("click", () => copySelectedRow());
 
-      $("chipUnique").addEventListener("click", () => {
-        chipUniqueOn = !chipUniqueOn;
-        setChips();
-        applyFilters();
-      });
+      const close = $("close");
+      if (close) close.addEventListener("click", () => hideDrawer());
 
-      $("chipCopy").addEventListener("click", () => copySelectedRow());
-
-      $("close").addEventListener("click", () => hideDrawer());
-
-      window.addEventListener("keydown", (e) => {
-        if (e.key === "Escape") hideDrawer();
-      });
+      window.addEventListener("keydown", (e) => { if (e.key === "Escape") hideDrawer(); });
     }
 
     async function load(){
-      $("subtitle").textContent = "Loading…";
-      $("meta").textContent = "—";
+      const subtitle = $("subtitle");
+      if (subtitle) subtitle.textContent = "Loading…";
+
+      // IMPORTANT: do NOT overwrite #meta textContent (it contains badges)
 
       try{
         const res = await fetch(DATA_URL, { cache: "no-store" });
@@ -881,23 +883,21 @@
         raw = data;
         cols = raw.length ? Object.keys(raw[0]) : [];
 
-        // normalize rows to first row's columns
         raw = raw.map(r => {
           const o = {};
           for (const c of cols) o[c] = (c in r) ? r[c] : null;
           return o;
         });
 
-        // column dropdown (generic col filter)
         const colSel = $("col");
-        colSel.innerHTML = cols.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join("");
-        if (cols.length) colSel.value = cols[0];
+        if (colSel){
+          colSel.innerHTML = cols.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join("");
+          if (cols.length) colSel.value = cols[0];
+        }
 
-        // NEW: compute runs and fill run dropdown
         computeRunCounts();
         renderRunDropdown();
 
-        // reset state (keep run selection if possible)
         page = 1;
         sortKey = null;
         sortDir = "asc";
@@ -910,14 +910,20 @@
         applyFilters();
       } catch (e){
         console.error(e);
-        $("subtitle").textContent = "Failed to load data.json";
-        $("meta").textContent = String(e.message || e);
-        $("thead").innerHTML = "";
-        $("tbody").innerHTML = `<tr><td style="padding:16px;color:var(--muted)">
-          <strong>Could not load <code>data.json</code>.</strong><br>
-          ${escapeHtml(String(e.message || e))}<br><br>
-          Local: run <code>python -m http.server</code> in repo root and open <code>http://localhost:8000</code>.
-        </td></tr>`;
+
+        if (subtitle) subtitle.textContent = "Failed to load data.json";
+
+        const thead = $("thead");
+        const tbody = $("tbody");
+        if (thead) thead.innerHTML = "";
+
+        if (tbody){
+          tbody.innerHTML = `<tr><td style="padding:16px;color:var(--muted)">
+            <strong>Could not load <code>data.json</code>.</strong><br>
+            ${escapeHtml(String(e.message || e))}<br><br>
+            Local: run <code>python -m http.server</code> in repo root and open <code>http://localhost:8000</code>.
+          </td></tr>`;
+        }
       }
     }
 
