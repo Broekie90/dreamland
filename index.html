@@ -145,7 +145,7 @@
       font-family: var(--font);
       font-size: 13px;
     }
-    .pill input{ min-width: 260px; }
+    .pill input{ min-width: 240px; }
     .pill select{ min-width: 160px; cursor:pointer; }
     .pill input::placeholder{ color: color-mix(in srgb, var(--muted) 70%, transparent); }
 
@@ -199,7 +199,22 @@
       margin-top: 5px;
       color: var(--muted);
       font-size: 12px;
+      display:flex;
+      gap:10px;
+      flex-wrap: wrap;
+      align-items:center;
     }
+
+    .badge{
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--muted);
+      padding: 6px 10px;
+      border: 1px solid rgba(255,255,255,.11);
+      border-radius: 999px;
+      background: rgba(255,255,255,.04);
+    }
+    .badge strong{ color: color-mix(in srgb, var(--text) 90%, var(--muted)); font-weight: 800; }
 
     .chips{
       display:flex;
@@ -232,7 +247,7 @@
     .tablewrap{
       position: relative;
       overflow:auto;
-      max-height: calc(100vh - 240px);
+      max-height: calc(100vh - 250px);
       background: rgba(255,255,255,.02);
     }
 
@@ -386,7 +401,7 @@
     }
 
     @media (max-width: 900px){
-      .pill input{ min-width: 180px; }
+      .pill input{ min-width: 170px; }
       table{ table-layout:auto; }
       tbody td{ white-space: normal; }
     }
@@ -407,7 +422,13 @@
       <div class="actions">
         <div class="pill" title="Zoeken over alle kolommen">
           <span style="opacity:.85">🔎</span>
-          <input id="q" type="search" placeholder="Search… (e.g. 'Amsterdam', '42', 'active')" />
+          <input id="q" type="search" placeholder="Search… (e.g. '123', 'CDRN', 'Done')" />
+        </div>
+
+        <!-- NEW: Costing_run dropdown -->
+        <div class="pill" title="Filter op Costing_run (distinct)">
+          <span style="opacity:.85">🏷</span>
+          <select id="run"></select>
         </div>
 
         <div class="pill" title="Filter: alleen rijen waar kolom waarde bevat (substring match)">
@@ -435,7 +456,11 @@
       <div class="panel-hd">
         <div>
           <h2 class="title">Table view</h2>
-          <div class="meta" id="meta">—</div>
+          <div class="meta" id="meta">
+            <span class="badge" id="badgeRun">Costing_run: <strong>All</strong></span>
+            <span class="badge" id="badgeRunCount">Run count: <strong>—</strong></span>
+            <span class="badge" id="badgeRows">Rows: <strong>—</strong></span>
+          </div>
         </div>
         <div class="chips">
           <div class="chip" id="chipNull">NULL/empty</div>
@@ -475,6 +500,7 @@
 
   <script>
     const DATA_URL = "./data.json";
+    const COSTING_RUN_COL = "Costing_run";
 
     let raw = [];
     let cols = [];
@@ -487,8 +513,12 @@
     let chipNullOn = false;
     let chipUniqueOn = false;
 
-    let selectedIndex = -1; // index within current page slice
+    let selectedIndex = -1;
     let selectedRow = null;
+
+    // NEW: run counts and selected run
+    let runCounts = new Map();     // run -> count in RAW
+    let selectedRun = "__ALL__";   // "__ALL__" or actual string
 
     const $ = (id) => document.getElementById(id);
 
@@ -546,10 +576,74 @@
       $("chipUnique").classList.toggle("on", chipUniqueOn);
     }
 
+    // NEW: compute distinct costing runs from RAW
+    function computeRunCounts(){
+      runCounts = new Map();
+      const hasCol = cols.includes(COSTING_RUN_COL);
+      if (!hasCol) return;
+
+      for (const r of raw){
+        const key = safeStr(r[COSTING_RUN_COL]).trim();
+        const run = key === "" ? "(empty)" : key;
+        runCounts.set(run, (runCounts.get(run) || 0) + 1);
+      }
+    }
+
+    // NEW: fill the dropdown
+    function renderRunDropdown(){
+      const sel = $("run");
+      const hasCol = cols.includes(COSTING_RUN_COL);
+
+      if (!hasCol){
+        sel.innerHTML = `<option value="__ALL__">No Costing_run column</option>`;
+        sel.disabled = true;
+        selectedRun = "__ALL__";
+        return;
+      }
+
+      // sort runs by count desc, then name asc
+      const items = Array.from(runCounts.entries())
+        .sort((a,b) => (b[1]-a[1]) || a[0].localeCompare(b[0], undefined, {numeric:true, sensitivity:"base"}));
+
+      const opts = [
+        `<option value="__ALL__">All Costing_run (${raw.length})</option>`,
+        ...items.map(([run, cnt]) => `<option value="${escapeHtml(run)}">${escapeHtml(run)} (${cnt})</option>`)
+      ];
+
+      sel.innerHTML = opts.join("");
+      sel.disabled = false;
+
+      // keep selection if still exists
+      if (selectedRun !== "__ALL__" && !runCounts.has(selectedRun)){
+        selectedRun = "__ALL__";
+      }
+      sel.value = selectedRun;
+    }
+
+    // NEW: update badges for run + counts
+    function renderRunBadges(){
+      const badgeRun = $("badgeRun");
+      const badgeRunCount = $("badgeRunCount");
+      const badgeRows = $("badgeRows");
+
+      const runLabel = (selectedRun === "__ALL__") ? "All" : selectedRun;
+      badgeRun.innerHTML = `Costing_run: <strong>${escapeHtml(runLabel)}</strong>`;
+
+      // count in selected run (from RAW counts)
+      let inRun = raw.length;
+      if (selectedRun !== "__ALL__"){
+        inRun = runCounts.get(selectedRun) || 0;
+      }
+      badgeRunCount.innerHTML = `Run count: <strong>${inRun.toLocaleString()}</strong>`;
+
+      // current filtered rows (after all filters)
+      badgeRows.innerHTML = `Rows: <strong>${filtered.length.toLocaleString()}</strong>`;
+    }
+
     function computeMeta(){
       $("subtitle").textContent = `Loaded ${raw.length.toLocaleString()} rows • ${nowStamp()}`;
-      $("meta").textContent =
-        `Rows: ${raw.length.toLocaleString()} • Filtered: ${filtered.length.toLocaleString()} • Columns: ${cols.length} • Page size: ${pageSize}`;
+      $("meta").setAttribute("title", "Counts update live with filters");
+      // badges are set in renderRunBadges()
     }
 
     function applyFilters(){
@@ -558,6 +652,15 @@
       const colv = $("colv").value.trim().toLowerCase();
 
       let out = raw;
+
+      // NEW: costing_run filter first (exact match)
+      if (cols.includes(COSTING_RUN_COL) && selectedRun !== "__ALL__"){
+        out = out.filter(r => {
+          const v = safeStr(r[COSTING_RUN_COL]).trim();
+          const normalized = (v === "" ? "(empty)" : v);
+          return normalized === selectedRun;
+        });
+      }
 
       // global search
       if (q){
@@ -602,6 +705,7 @@
       hideDrawer();
 
       computeMeta();
+      renderRunBadges();
       renderHeader();
       renderBody();
     }
@@ -686,7 +790,6 @@
       try{
         await navigator.clipboard.writeText(JSON.stringify(selectedRow, null, 2));
       } catch (e){
-        // fallback
         const ta = document.createElement("textarea");
         ta.value = JSON.stringify(selectedRow, null, 2);
         document.body.appendChild(ta);
@@ -711,10 +814,15 @@
 
     function initControls(){
       $("q").addEventListener("input", () => applyFilters());
-
       $("colv").addEventListener("input", () => applyFilters());
-
       $("col").addEventListener("change", () => applyFilters());
+
+      // NEW: run dropdown changes
+      $("run").addEventListener("change", () => {
+        selectedRun = $("run").value;
+        page = 1;
+        applyFilters();
+      });
 
       $("ps").addEventListener("change", () => {
         pageSize = Number($("ps").value);
@@ -755,7 +863,6 @@
 
       $("close").addEventListener("click", () => hideDrawer());
 
-      // ESC closes drawer
       window.addEventListener("keydown", (e) => {
         if (e.key === "Escape") hideDrawer();
       });
@@ -769,7 +876,6 @@
         const res = await fetch(DATA_URL, { cache: "no-store" });
         if (!res.ok) throw new Error(`HTTP ${res.status} while fetching ${DATA_URL}`);
         const data = await res.json();
-
         if (!Array.isArray(data)) throw new Error("data.json must be an array of objects (rows).");
 
         raw = data;
@@ -782,12 +888,16 @@
           return o;
         });
 
-        // column dropdown
+        // column dropdown (generic col filter)
         const colSel = $("col");
         colSel.innerHTML = cols.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join("");
         if (cols.length) colSel.value = cols[0];
 
-        // reset state
+        // NEW: compute runs and fill run dropdown
+        computeRunCounts();
+        renderRunDropdown();
+
+        // reset state (keep run selection if possible)
         page = 1;
         sortKey = null;
         sortDir = "asc";
@@ -797,7 +907,6 @@
         hideDrawer();
 
         computeMeta();
-        renderHeader();
         applyFilters();
       } catch (e){
         console.error(e);
