@@ -1,74 +1,62 @@
 [
   {
-    "Old_internal_id": "1189",
-    "New_internal_id": "326176",
-    "Created_in_NS": 1,
+    "Old_item_id": 236,
+    "New_item_id": 324874,
+    "Costing_run": "CDRN_COS_1",
     "Status": "Done"
   },
   {
-    "Old_internal_id": "1190",
-    "New_internal_id": "326177",
-    "Created_in_NS": 1,
+    "Old_item_id": 1296,
+    "New_item_id": 325972,
+    "Costing_run": "CDRN_COS_02",
     "Status": "Done"
   },
   {
-    "Old_internal_id": "1191",
-    "New_internal_id": "326178",
-    "Created_in_NS": 1,
+    "Old_item_id": 41358,
+    "New_item_id": 325973,
+    "Costing_run": "CDRN_COS_02",
     "Status": "Done"
   },
   {
-    "Old_internal_id": "228",
-    "New_internal_id": "325873",
-    "Created_in_NS": 1,
+    "Old_item_id": 72021,
+    "New_item_id": 325974,
+    "Costing_run": "CDRN_COS_02",
     "Status": "Done"
   },
   {
-    "Old_internal_id": "234",
-    "New_internal_id": "326172",
-    "Created_in_NS": 1,
+    "Old_item_id": 94531,
+    "New_item_id": 326272,
+    "Costing_run": "CDRN_COS_02",
     "Status": "Done"
   },
   {
-    "Old_internal_id": "236",
-    "New_internal_id": "326173",
-    "Created_in_NS": 1,
+    "Old_item_id": 94536,
+    "New_item_id": 326273,
+    "Costing_run": "CDRN_COS_02",
     "Status": "Done"
   },
   {
-    "Old_internal_id": "238",
-    "New_internal_id": "326174",
-    "Created_in_NS": 1,
+    "Old_item_id": 94565,
+    "New_item_id": 326274,
+    "Costing_run": "CDRN_COS_02",
     "Status": "Done"
   },
   {
-    "Old_internal_id": "241",
-    "New_internal_id": "326175",
-    "Created_in_NS": 1,
+    "Old_item_id": 94588,
+    "New_item_id": 326275,
+    "Costing_run": "CDRN_COS_02",
     "Status": "Done"
   },
   {
-    "Old_internal_id": "94531",
-    "New_internal_id": "326272",
-    "Created_in_NS": 1,
+    "Old_item_id": 94776,
+    "New_item_id": 325975,
+    "Costing_run": "CDRN_COS_02",
     "Status": "Done"
   },
   {
-    "Old_internal_id": "94536",
-    "New_internal_id": "326273",
-    "Created_in_NS": 1,
-    "Status": "Done"
-  },
-  {
-    "Old_internal_id": "94565",
-    "New_internal_id": "326274",
-    "Created_in_NS": 1,
-    "Status": "Done"
-  },
-  {
-    "Old_internal_id": "94588",
-    "New_internal_id": "326275",
-    "Created_in_NS": 1,
+    "Old_item_id": 95488,
+    "New_item_id": 326076,
+    "Costing_run": "CDRN_COS_02",
     "Status": "Done"
   }
 ]
